@@ -10,6 +10,8 @@ use Symfony\Component\HttpKernel\KernelEvents;
 
 class NodeRedirectSubscriber implements EventSubscriberInterface {
 
+  protected const REDIRECT_GUARD_KEY = '_isc_redirect_guard';
+
   protected $matcher;
 
   public function __construct(RedirectRuleMatcher $matcher) {
@@ -32,6 +34,10 @@ class NodeRedirectSubscriber implements EventSubscriberInterface {
       return;
     }
 
+    if ($request->attributes->get(self::REDIRECT_GUARD_KEY)) {
+      return;
+    }
+
     $node = $request->attributes->get('node');
     if (!$node instanceof NodeInterface) {
       return;
@@ -39,6 +45,12 @@ class NodeRedirectSubscriber implements EventSubscriberInterface {
 
     $response = $this->matcher->match($node);
     if ($response !== NULL) {
+      $target_path = parse_url($response->getTargetUrl(), PHP_URL_PATH) ?: '';
+      $current_path = $request->getPathInfo();
+      if ($target_path === $current_path) {
+        return;
+      }
+      $request->attributes->set(self::REDIRECT_GUARD_KEY, TRUE);
       $event->setResponse($response);
     }
   }

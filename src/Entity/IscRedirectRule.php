@@ -43,7 +43,10 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  *     "vocabulary",
  *     "match_value",
  *     "match_label",
+ *     "condition_operator",
+ *     "conditions",
  *     "destination",
+ *     "destination_translations",
  *     "status_code",
  *     "weight"
  *   }
@@ -60,7 +63,10 @@ class IscRedirectRule extends ConfigEntityBase {
   protected $vocabulary = '';
   protected $match_value = '';
   protected $match_label = '';
+  protected $condition_operator = 'AND';
+  protected $conditions = [];
   protected $destination = '';
+  protected $destination_translations = [];
   protected $status_code = 302;
   protected $weight = 0;
 
