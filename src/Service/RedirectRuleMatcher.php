@@ -37,23 +37,44 @@ class RedirectRuleMatcher {
         continue;
       }
 
-      $field_name = (string) ($rule->get('field_name') ?: '');
-      $condition_type = (string) ($rule->get('condition_type') ?: '');
-      $vocabulary = (string) ($rule->get('vocabulary') ?: '');
-      $match_value = (string) ($rule->get('match_value') ?: '');
-
-      if ($field_name === '' || $condition_type === '' || $match_value === '') {
-        continue;
-      }
-      if (!$node->hasField($field_name) || $node->get($field_name)->isEmpty()) {
+      $conditions = $this->normalizeConditions($rule);
+      if ($conditions === []) {
         continue;
       }
 
-      if (!$this->fieldMatches($node, $field_name, $condition_type, $vocabulary, $match_value)) {
+      $operator = strtoupper((string) ($rule->get('condition_operator') ?: 'AND'));
+      if (!in_array($operator, ['AND', 'OR'], TRUE)) {
+        $operator = 'AND';
+      }
+
+      $matched = $operator === 'AND';
+      foreach ($conditions as $condition) {
+        $current = $this->fieldMatches(
+          $node,
+          $condition['field_name'],
+          $condition['condition_type'],
+          $condition['vocabulary'],
+          $condition['match_value']
+        );
+
+        if ($operator === 'AND' && !$current) {
+          $matched = FALSE;
+          break;
+        }
+        if ($operator === 'OR' && $current) {
+          $matched = TRUE;
+          break;
+        }
+        if ($operator === 'OR') {
+          $matched = FALSE;
+        }
+      }
+
+      if (!$matched) {
         continue;
       }
 
-      $destination = trim((string) ($rule->get('destination') ?: ''));
+      $destination = $this->resolveDestination($rule, $node);
       if ($destination === '') {
         continue;
       }
@@ -69,7 +90,59 @@ class RedirectRuleMatcher {
     return NULL;
   }
 
+  protected function normalizeConditions($rule) {
+    $conditions = $rule->get('conditions') ?: [];
+    if (!is_array($conditions) || $conditions === []) {
+      $legacy = [
+        'field_name' => (string) ($rule->get('field_name') ?: ''),
+        'condition_type' => (string) ($rule->get('condition_type') ?: ''),
+        'vocabulary' => (string) ($rule->get('vocabulary') ?: ''),
+        'match_value' => (string) ($rule->get('match_value') ?: ''),
+      ];
+      $conditions = [$legacy];
+    }
+
+    $result = [];
+    foreach ($conditions as $condition) {
+      $field_name = (string) ($condition['field_name'] ?? '');
+      $condition_type = (string) ($condition['condition_type'] ?? '');
+      $vocabulary = (string) ($condition['vocabulary'] ?? '');
+      $match_value = (string) ($condition['match_value'] ?? '');
+
+      if ($field_name === '' || $condition_type === '' || $match_value === '') {
+        continue;
+      }
+
+      $result[] = [
+        'field_name' => $field_name,
+        'condition_type' => $condition_type,
+        'vocabulary' => $vocabulary,
+        'match_value' => $match_value,
+      ];
+    }
+
+    return $result;
+  }
+
+  protected function resolveDestination($rule, NodeInterface $node) {
+    $langcode = $node->language()->getId();
+    $translations = $rule->get('destination_translations') ?: [];
+    if (is_array($translations)) {
+      foreach ($translations as $row) {
+        if (($row['langcode'] ?? '') === $langcode && !empty($row['destination'])) {
+          return trim((string) $row['destination']);
+        }
+      }
+    }
+
+    return trim((string) ($rule->get('destination') ?: ''));
+  }
+
   protected function fieldMatches(NodeInterface $node, $field_name, $condition_type, $vocabulary, $match_value) {
+    if (!$node->hasField($field_name) || $node->get($field_name)->isEmpty()) {
+      return FALSE;
+    }
+
     $field = $node->get($field_name);
 
     if ($condition_type === 'taxonomy_term') {
