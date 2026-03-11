@@ -1,0 +1,12 @@
+services:
+  isc_redirect_manager.matcher:
+    class: Drupal\isc_redirect_manager\Service\RedirectRuleMatcher
+    arguments:
+      - '@entity_type.manager'
+
+  isc_redirect_manager.subscriber:
+    class: Drupal\isc_redirect_manager\EventSubscriber\NodeRedirectSubscriber
+    arguments:
+      - '@isc_redirect_manager.matcher'
+    tags:
+      - { name: event_subscriber }

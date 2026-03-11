@@ -1,0 +1,40 @@
+isc_redirect_manager.isc_redirect_rule.*:
+  type: config_entity
+  label: 'ISC redirect rule'
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    label:
+      type: label
+      label: 'Label'
+    enabled:
+      type: boolean
+      label: 'Enabled'
+    bundle:
+      type: string
+      label: 'Content type'
+    field_name:
+      type: string
+      label: 'Field machine name'
+    condition_type:
+      type: string
+      label: 'Condition type'
+    vocabulary:
+      type: string
+      label: 'Vocabulary'
+    match_value:
+      type: string
+      label: 'Match value'
+    match_label:
+      type: string
+      label: 'Match label'
+    destination:
+      type: string
+      label: 'Destination'
+    status_code:
+      type: integer
+      label: 'HTTP status code'
+    weight:
+      type: integer
+      label: 'Weight'

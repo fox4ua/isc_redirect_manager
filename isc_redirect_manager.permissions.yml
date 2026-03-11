@@ -1,0 +1,3 @@
+administer isc redirect rules:
+  title: 'Administer ISC redirect rules'
+  description: 'Create, edit, delete and manage redirect rules.'

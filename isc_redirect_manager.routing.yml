@@ -1,0 +1,31 @@
+entity.isc_redirect_rule.collection:
+  path: '/admin/config/search/isc-redirects'
+  defaults:
+    _entity_list: 'isc_redirect_rule'
+    _title: 'ISC Redirect rules'
+  requirements:
+    _permission: 'administer isc redirect rules'
+
+entity.isc_redirect_rule.add_form:
+  path: '/admin/config/search/isc-redirects/add'
+  defaults:
+    _entity_form: 'isc_redirect_rule.add'
+    _title: 'Add redirect rule'
+  requirements:
+    _permission: 'administer isc redirect rules'
+
+entity.isc_redirect_rule.edit_form:
+  path: '/admin/config/search/isc-redirects/{isc_redirect_rule}'
+  defaults:
+    _entity_form: 'isc_redirect_rule.edit'
+    _title: 'Edit redirect rule'
+  requirements:
+    _permission: 'administer isc redirect rules'
+
+entity.isc_redirect_rule.delete_form:
+  path: '/admin/config/search/isc-redirects/{isc_redirect_rule}/delete'
+  defaults:
+    _entity_form: 'isc_redirect_rule.delete'
+    _title: 'Delete redirect rule'
+  requirements:
+    _permission: 'administer isc redirect rules'

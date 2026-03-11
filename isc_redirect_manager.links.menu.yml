@@ -1,0 +1,6 @@
+entity.isc_redirect_rule.collection:
+  title: 'ISC Redirects'
+  description: 'Manage redirects by field values.'
+  route_name: entity.isc_redirect_rule.collection
+  parent: system.admin_config_search
+  weight: 100

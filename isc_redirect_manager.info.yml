@@ -1,0 +1,9 @@
+name: ISC Redirect Manager
+type: module
+description: 'Universal redirect rules for nodes based on taxonomy, list, and boolean field values.'
+package: ISC
+core_version_requirement: ^10 || ^11
+dependencies:
+  - drupal:node
+  - drupal:taxonomy
+  - drupal:options
