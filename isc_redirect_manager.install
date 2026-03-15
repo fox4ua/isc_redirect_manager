@@ -291,3 +291,22 @@ function isc_redirect_manager_update_11010(): void {
     }
   }
 }
+
+/**
+ * Implements hook_uninstall().
+ */
+function isc_redirect_manager_uninstall(): void {
+  $database = \Drupal::database();
+  $schema = $database->schema();
+
+  foreach (['isc_redirect_manager_log', 'isc_redirect_manager_stats', 'isc_redirect_manager_stats_daily'] as $table) {
+    if ($schema->tableExists($table)) {
+      $schema->dropTable($table);
+    }
+  }
+
+  \Drupal::configFactory()->getEditable('isc_redirect_manager.settings')->delete();
+  \Drupal::state()->delete('isc_redirect_manager.failure_log');
+  \Drupal::state()->delete('isc_redirect_manager.rule_stats');
+  \Drupal\Core\Cache\Cache::invalidateTags(['isc_redirect_manager_rules']);
+}
