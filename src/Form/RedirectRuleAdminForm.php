@@ -608,82 +608,8 @@ $rule->getTargetEntityType(),
     return $prefixed;
   }
 
-  protected function getEntityGroupLabel(string $entity_type): string {
-    return $entity_type === 'taxonomy_term' ? (string) $this->t('Словник') : (string) $this->t('Тип матеріалу');
-  }
-
   protected function getBundleLabel(string $entity_type, string $bundle): string {
     $options = $entity_type === 'taxonomy_term' ? $this->getVocabularyOptions() : $this->getNodeBundleOptions();
     return $options[$bundle] ?? $bundle;
   }
-
-  protected function flattenBundleOptions(array $grouped_options): array {
-    $flat = [];
-    foreach ($grouped_options as $key => $value) {
-      if (is_array($value)) {
-        foreach ($value as $sub_key => $sub_value) {
-          $flat[$sub_key] = $sub_value;
-        }
-      }
-      else {
-        $flat[$key] = $value;
-      }
-    }
-    return $flat;
-  }
-
-
-  /**
-   * Returns integrity issues for rules referencing deleted bundle/field/value targets.
-   *
-   * @return string[]
-   */
-  protected function getRuleIntegrityIssues(IscRedirectRule $rule): array {
-    $issues = [];
-    $entity_type = $rule->getTargetEntityType();
-    $bundle = $rule->getBundle();
-
-    if ($bundle === '' || $this->getBundleLabel($entity_type, $bundle) === $bundle) {
-      $bundle_exists = $entity_type === 'node'
-        ? $this->entityTypeManager->getStorage('node_type')->load($bundle)
-        : $this->entityTypeManager->getStorage('taxonomy_vocabulary')->load($bundle);
-      if (!$bundle_exists) {
-        $issues[] = (string) $this->t('Відсутній bundle/словник');
-        return $issues;
-      }
-    }
-
-    if ($rule->getMatchMode() === 'entity_id' && $rule->getTargetEntityId() !== '') {
-      $entity = $this->entityTypeManager->getStorage($entity_type)->load($rule->getTargetEntityId());
-      if (!$entity) {
-        $issues[] = (string) $this->t('Відсутня цільова сутність');
-      }
-    }
-
-    $field_name = $rule->getFieldName();
-    if ($entity_type === 'node' && $field_name !== '') {
-      $definitions = $this->entityFieldManager->getFieldDefinitions('node', $bundle);
-      if (!isset($definitions[$field_name])) {
-        $issues[] = (string) $this->t('Відсутнє поле');
-        return $issues;
-      }
-
-      if ($rule->getConditionType() === 'taxonomy_term' && $rule->getMatchValue() !== '') {
-        $term = $this->entityTypeManager->getStorage('taxonomy_term')->load($rule->getMatchValue());
-        if (!$term) {
-          $issues[] = (string) $this->t('Відсутній термін');
-        }
-      }
-    }
-
-    if ($entity_type === 'taxonomy_term' && $rule->getMatchMode() === 'entity_id' && $rule->getMatchValue() !== '') {
-      $term = $this->entityTypeManager->getStorage('taxonomy_term')->load($rule->getMatchValue());
-      if (!$term) {
-        $issues[] = (string) $this->t('Відсутній термін');
-      }
-    }
-
-    return $issues;
-  }
-
 }

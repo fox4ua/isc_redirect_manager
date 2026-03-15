@@ -298,25 +298,6 @@ class RedirectRuleMatcher {
     return $issues;
   }
 
-  protected function ruleMatchesEntity(IscRedirectRule $rule, ContentEntityInterface $entity): bool {
-    if ($rule->getMatchMode() === 'entity_bundle') {
-      return TRUE;
-    }
-    if ($rule->getMatchMode() === 'entity_id') {
-      return (string) $entity->id() === $rule->getTargetEntityId();
-    }
-    $field_name = $rule->getFieldName();
-    $condition_type = $rule->getConditionType();
-    $match_value = $rule->getMatchValue();
-    if ($field_name === '' || $condition_type === '' || $match_value === '') {
-      return FALSE;
-    }
-    if (!$entity->hasField($field_name) || $entity->get($field_name)->isEmpty()) {
-      return FALSE;
-    }
-    return $this->fieldMatches($entity, $field_name, $condition_type, $rule->getVocabulary(), $match_value);
-  }
-
   protected function runtimeRuleMatchesEntity(array $rule, ContentEntityInterface $entity): bool {
     $mode = (string) ($rule['match_mode'] ?? 'field_value');
     if ($mode === 'entity_bundle') {
