@@ -53,17 +53,17 @@ class RedirectLogController extends ControllerBase {
     return [
       '#type' => 'table',
       '#header' => [
-        $this->t('Time'),
-        $this->t('Event'),
-        $this->t('Rule'),
-        $this->t('Node ID'),
-        $this->t('Language'),
-        $this->t('Base destination'),
-        $this->t('Built destination'),
-        $this->t('Reason'),
+        $this->t('Час'),
+        $this->t('Подія'),
+        $this->t('Правило'),
+        $this->t('ID матеріалу'),
+        $this->t('Мова'),
+        $this->t('Базове місце призначення'),
+        $this->t('Сформоване місце призначення'),
+        $this->t('Причина'),
       ],
       '#rows' => $rows,
-      '#empty' => $this->t('No redirect failures logged yet.'),
+      '#empty' => $this->t('Помилки редиректу ще не зафіксовано.'),
     ];
   }
 
