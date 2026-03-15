@@ -20,15 +20,15 @@ class RedirectSettingsForm extends ConfigFormBase {
 
     $form['debug_logging'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Enable debug logging'),
-      '#description' => $this->t('Write additional diagnostic messages for matched, skipped and fallback redirect checks.'),
+      '#title' => $this->t('Увімкнути розширене журналювання'),
+      '#description' => $this->t('Записувати додаткові діагностичні повідомлення для перевірок збігів, пропусків і fallback-сценаріїв редиректу.'),
       '#default_value' => (bool) $config->get('debug_logging'),
     ];
 
     $form['failure_log_throttle_window'] = [
       '#type' => 'number',
-      '#title' => $this->t('Failure log throttle window (seconds)'),
-      '#description' => $this->t('Identical failure entries within this time window are stored only once. Set 0 to disable throttling.'),
+      '#title' => $this->t('Вікно тротлінгу журналу помилок (секунди)'),
+      '#description' => $this->t('Однакові записи про помилки в межах цього часового вікна зберігаються лише один раз. Встановіть 0, щоб вимкнути тротлінг.'),
       '#default_value' => (int) ($config->get('failure_log_throttle_window') ?? 300),
       '#min' => 0,
       '#max' => 86400,
@@ -37,8 +37,8 @@ class RedirectSettingsForm extends ConfigFormBase {
 
     $form['max_failure_log_entries'] = [
       '#type' => 'number',
-      '#title' => $this->t('Maximum failure log entries'),
-      '#description' => $this->t('How many rows to keep in the redirect failure log table.'),
+      '#title' => $this->t('Максимальна кількість записів журналу помилок'),
+      '#description' => $this->t('Скільки рядків зберігати в таблиці журналу помилок редиректу.'),
       '#default_value' => (int) $config->get('max_failure_log_entries') ?: 200,
       '#min' => 10,
       '#max' => 5000,
@@ -47,8 +47,8 @@ class RedirectSettingsForm extends ConfigFormBase {
 
     $form['max_stat_entries'] = [
       '#type' => 'number',
-      '#title' => $this->t('Maximum statistics entries'),
-      '#description' => $this->t('How many rule hit counters to keep in the redirect statistics table.'),
+      '#title' => $this->t('Максимальна кількість статистичних записів'),
+      '#description' => $this->t('Скільки лічильників спрацювань правил зберігати в таблиці статистики редиректів.'),
       '#default_value' => (int) $config->get('max_stat_entries') ?: 500,
       '#min' => 10,
       '#max' => 10000,

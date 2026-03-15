@@ -157,15 +157,15 @@ class RedirectStatsController extends ControllerBase {
       'table' => [
         '#type' => 'table',
         '#header' => [
-          $this->t('Rule'),
+          $this->t('Правило'),
           $this->t('Тип матеріалів'),
           $this->t('Спрацювання'),
-          $this->t('Last triggered'),
-          $this->t('Last node ID'),
-          $this->t('Last destination'),
+          $this->t('Останнє спрацювання'),
+          $this->t('ID останнього матеріалу'),
+          $this->t('Останнє місце призначення'),
         ],
         '#rows' => $rows,
-        '#empty' => $this->t('No redirect statistics yet.'),
+        '#empty' => $this->t('Статистика редиректів поки що відсутня.'),
       ],
     ];
   }
