@@ -1,0 +1,4 @@
+debug_logging: false
+failure_log_throttle_window: 300
+max_failure_log_entries: 200
+max_stat_entries: 500

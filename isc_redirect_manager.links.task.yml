@@ -1,0 +1,29 @@
+isc_redirect_manager.node_rules_tab:
+  route_name: isc_redirect_manager.node_rules
+  title: 'Матеріали'
+  base_route: entity.isc_redirect_rule.collection
+  weight: 0
+
+isc_redirect_manager.taxonomy_rules_tab:
+  route_name: isc_redirect_manager.taxonomy_rules
+  title: 'Таксономія'
+  base_route: entity.isc_redirect_rule.collection
+  weight: 1
+
+isc_redirect_manager.stats_tab:
+  route_name: isc_redirect_manager.stats
+  title: 'Статистика'
+  base_route: entity.isc_redirect_rule.collection
+  weight: 10
+
+isc_redirect_manager.logs_tab:
+  route_name: isc_redirect_manager.logs
+  title: 'Журнал помилок'
+  base_route: entity.isc_redirect_rule.collection
+  weight: 11
+
+isc_redirect_manager.settings_tab:
+  route_name: isc_redirect_manager.settings
+  title: 'Налаштування'
+  base_route: entity.isc_redirect_rule.collection
+  weight: 20

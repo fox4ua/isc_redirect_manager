@@ -1,3 +1,28 @@
+view isc redirect rules:
+  title: "View ISC redirect rules"
+  description: "View redirect rules administration screens."
+
+manage isc redirect rules:
+  title: "Create and edit ISC redirect rules"
+  description: "Create, edit, reorder, preview and enable or disable redirect rules."
+
+delete isc redirect rules:
+  title: "Delete ISC redirect rules"
+  description: "Delete redirect rules."
+
+view isc redirect logs:
+  title: "View ISC redirect logs"
+  description: "View redirect fallback logs."
+
+view isc redirect stats:
+  title: "View ISC redirect statistics"
+  description: "View redirect usage statistics."
+
+administer isc redirect settings:
+  title: "Administer ISC redirect settings"
+  description: "Change debug logging and retention settings."
+
 administer isc redirect rules:
-  title: 'Administer ISC redirect rules'
-  description: 'Create, edit, delete and manage redirect rules.'
+  title: "Administer ISC redirect rules"
+  description: "Full access to all ISC redirect rule operations and settings."
+  restrict access: true

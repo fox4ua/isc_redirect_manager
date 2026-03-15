@@ -1,0 +1,15 @@
+<?php
+
+/**
+ * @file
+ * Runtime hooks for ISC Redirect Manager.
+ */
+
+/**
+ * Implements hook_cron().
+ */
+function isc_redirect_manager_cron(): void {
+  $logger = \Drupal::service('isc_redirect_manager.failure_logger');
+  $logger->cleanupLogs();
+  $logger->cleanupStats();
+}

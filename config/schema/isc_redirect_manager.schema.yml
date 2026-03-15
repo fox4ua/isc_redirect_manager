@@ -11,9 +11,18 @@ isc_redirect_manager.isc_redirect_rule.*:
     enabled:
       type: boolean
       label: 'Enabled'
+    entity_type:
+      type: string
+      label: 'Entity type'
     bundle:
       type: string
-      label: 'Content type'
+      label: 'Bundle'
+    match_mode:
+      type: string
+      label: 'Match mode'
+    target_entity_id:
+      type: string
+      label: 'Target entity ID'
     field_name:
       type: string
       label: 'Field machine name'
@@ -29,48 +38,35 @@ isc_redirect_manager.isc_redirect_rule.*:
     match_label:
       type: string
       label: 'Match label'
-    condition_operator:
-      type: string
-      label: 'Condition operator'
-    conditions:
-      type: sequence
-      label: 'Conditions'
-      sequence:
-        type: mapping
-        mapping:
-          field_name:
-            type: string
-            label: 'Field machine name'
-          condition_type:
-            type: string
-            label: 'Condition type'
-          vocabulary:
-            type: string
-            label: 'Vocabulary'
-          match_value:
-            type: string
-            label: 'Match value'
-          match_label:
-            type: string
-            label: 'Match label'
     destination:
       type: string
       label: 'Destination'
-    destination_translations:
-      type: sequence
-      label: 'Destination translations'
-      sequence:
-        type: mapping
-        mapping:
-          langcode:
-            type: string
-            label: 'Language code'
-          destination:
-            type: string
-            label: 'Destination'
+    language_mode:
+      type: string
+      label: 'Language mode'
+    target_langcode:
+      type: string
+      label: 'Target language code'
     status_code:
       type: integer
       label: 'HTTP status code'
     weight:
       type: integer
       label: 'Weight'
+
+isc_redirect_manager.settings:
+  type: config_object
+  label: 'ISC redirect manager settings'
+  mapping:
+    debug_logging:
+      type: boolean
+      label: 'Enable debug logging'
+    failure_log_throttle_window:
+      type: integer
+      label: 'Failure log throttle window'
+    max_failure_log_entries:
+      type: integer
+      label: 'Maximum failure log entries'
+    max_stat_entries:
+      type: integer
+      label: 'Maximum statistics entries'

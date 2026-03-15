@@ -1,1 +1,0 @@
-# isc_redirect_manager

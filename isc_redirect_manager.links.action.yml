@@ -1,5 +1,7 @@
-entity.isc_redirect_rule.add_form:
+entity.isc_redirect_rule.add_form.collection:
   route_name: entity.isc_redirect_rule.add_form
   title: 'Add redirect rule'
   appears_on:
     - entity.isc_redirect_rule.collection
+    - isc_redirect_manager.node_rules
+    - isc_redirect_manager.taxonomy_rules

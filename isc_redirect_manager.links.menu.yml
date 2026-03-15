@@ -1,6 +1,5 @@
-entity.isc_redirect_rule.collection:
-  title: 'ISC Redirects'
-  description: 'Manage redirects by field values.'
+isc_redirect_manager.admin:
+  title: 'ISC redirect rules'
+  description: 'Manage redirect rules, logs, statistics and settings.'
   route_name: entity.isc_redirect_rule.collection
   parent: system.admin_config_search
-  weight: 100

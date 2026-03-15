@@ -1,12 +1,53 @@
 services:
+  logger.channel.isc_redirect_manager:
+    parent: logger.channel_base
+    arguments: ['isc_redirect_manager']
+
+  isc_redirect_manager.alias_lookup:
+    class: Drupal\isc_redirect_manager\Service\AliasLookupService
+    arguments:
+      - '@database'
+      - '@path.validator'
+      - '@entity_type.manager'
+      - '@path_alias.manager'
+
+  isc_redirect_manager.failure_logger:
+    class: Drupal\isc_redirect_manager\Service\RedirectFailureLogger
+    arguments:
+      - '@database'
+      - '@config.factory'
+      - '@logger.channel.isc_redirect_manager'
+      - '@datetime.time'
+
   isc_redirect_manager.matcher:
     class: Drupal\isc_redirect_manager\Service\RedirectRuleMatcher
     arguments:
       - '@entity_type.manager'
+      - '@path.validator'
+      - '@request_stack'
+      - '@logger.channel.isc_redirect_manager'
+      - '@cache.redirect_rules'
+      - '@language_manager'
+      - '@isc_redirect_manager.failure_logger'
+      - '@path_alias.manager'
+      - '@entity_field.manager'
+      - '@entity_type.bundle.info'
+      - '@lock'
+
+  isc_redirect_manager.rule_diagnostics:
+    class: Drupal\isc_redirect_manager\Service\RedirectRuleDiagnosticsService
+    arguments:
+      - '@isc_redirect_manager.matcher'
 
   isc_redirect_manager.subscriber:
     class: Drupal\isc_redirect_manager\EventSubscriber\NodeRedirectSubscriber
     arguments:
       - '@isc_redirect_manager.matcher'
+      - '@router.admin_context'
     tags:
       - { name: event_subscriber }
+
+  cache.redirect_rules:
+    class: Drupal\Core\Cache\CacheBackendInterface
+    factory: ['@cache_factory', 'get']
+    arguments: ['redirect_rules']

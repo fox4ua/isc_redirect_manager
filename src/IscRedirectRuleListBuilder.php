@@ -5,84 +5,53 @@ namespace Drupal\isc_redirect_manager;
 use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Link;
+use Drupal\isc_redirect_manager\Entity\IscRedirectRule;
 
 class IscRedirectRuleListBuilder extends ConfigEntityListBuilder {
 
   public function buildHeader(): array {
     return [
-      'label' => $this->t('Title'),
-      'enabled' => $this->t('Enabled'),
-      'bundle' => $this->t('Content type'),
-      'field_name' => $this->t('Field'),
-      'condition_type' => $this->t('Conditions'),
-      'match_label' => $this->t('Logic / values'),
-      'destination' => $this->t('Destination'),
-      'status_code' => $this->t('Code'),
-      'weight' => $this->t('Weight'),
+      'label' => $this->t('Назва'),
+      'enabled' => $this->t('Увімкнено'),
+      'entity_type' => $this->t('Тип сутності'),
+      'bundle' => $this->t('Набір'),
+      'match_mode' => $this->t('Режим співпадіння'),
+      'field_name' => $this->t('Поле'),
+      'condition_type' => $this->t('Умова'),
+      'match_label' => $this->t('Значення'),
+      'destination' => $this->t('Місце призначення'),
+      'language_mode' => $this->t('Мовний режим'),
+      'status_code' => $this->t('Код'),
+      'weight' => $this->t('Вага'),
     ] + parent::buildHeader();
   }
 
   public function buildRow(EntityInterface $entity): array {
+    /** @var \Drupal\isc_redirect_manager\Entity\IscRedirectRule $entity */
     return [
-      'label' => Link::createFromRoute(
-        $entity->label(),
-        'entity.isc_redirect_rule.edit_form',
-        ['isc_redirect_rule' => $entity->id()]
-      ),
-      'enabled' => $entity->status() ? $this->t('Yes') : $this->t('No'),
-      'bundle' => (string) $entity->get('bundle'),
-      'field_name' => (string) $entity->get('field_name'),
-      'condition_type' => $this->buildConditionSummary($entity),
-      'match_label' => $this->buildLogicSummary($entity),
-      'destination' => (string) $entity->get('destination'),
-      'status_code' => (string) ((int) ($entity->get('status_code') ?: 302)),
-      'weight' => (string) ((int) ($entity->get('weight') ?: 0)),
+      'label' => Link::createFromRoute($entity->label(), 'entity.isc_redirect_rule.edit_form', ['isc_redirect_rule' => $entity->id()]),
+      'enabled' => $entity->isEnabled() ? $this->t('Так') : $this->t('Ні'),
+      'entity_type' => $entity->getTargetEntityType(),
+      'bundle' => $entity->getBundle(),
+      'match_mode' => $entity->getMatchMode(),
+      'field_name' => $entity->getFieldName(),
+      'condition_type' => $entity->getConditionType(),
+      'match_label' => $entity->getMatchLabel(),
+      'destination' => $entity->getDestination(),
+      'language_mode' => $entity->getLanguageMode(),
+      'status_code' => (string) $entity->getStatusCode(),
+      'weight' => (string) $entity->getWeight(),
     ] + parent::buildRow($entity);
-  }
-
-  protected function buildConditionSummary(EntityInterface $entity): string {
-    $conditions = $entity->get('conditions') ?: [];
-    if (!is_array($conditions) || $conditions === []) {
-      return (string) $entity->get('condition_type');
-    }
-
-    $parts = [];
-    foreach ($conditions as $condition) {
-      $parts[] = (string) ($condition['field_name'] ?? '');
-    }
-
-    return implode(', ', array_filter($parts));
-  }
-
-  protected function buildLogicSummary(EntityInterface $entity): string {
-    $conditions = $entity->get('conditions') ?: [];
-    if (!is_array($conditions) || $conditions === []) {
-      return (string) ($entity->get('match_label') ?: $entity->get('match_value'));
-    }
-
-    $operator = (string) ($entity->get('condition_operator') ?: 'AND');
-    $parts = [];
-    foreach ($conditions as $condition) {
-      $parts[] = (string) ($condition['match_label'] ?? $condition['match_value'] ?? '');
-    }
-
-    return $operator . ': ' . implode(' | ', array_filter($parts));
   }
 
   public function load(): array {
     $entities = parent::load();
-
-    uasort($entities, static function ($a, $b) {
-      $weight_a = (int) ($a->get('weight') ?? 0);
-      $weight_b = (int) ($b->get('weight') ?? 0);
-
-      if ($weight_a === $weight_b) {
+    uasort($entities, static function (IscRedirectRule $a, IscRedirectRule $b): int {
+      if ($a->getWeight() === $b->getWeight()) {
         return strnatcasecmp($a->label(), $b->label());
       }
-
-      return $weight_a <=> $weight_b;
+      return $a->getWeight() <=> $b->getWeight();
     });
-
     return $entities;
   }
 
