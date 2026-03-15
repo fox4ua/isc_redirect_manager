@@ -21,14 +21,6 @@ isc_redirect_manager.taxonomy_rules:
   requirements:
     _permission: 'view isc redirect rules'
 
-isc_redirect_manager.preview:
-  path: '/admin/config/search/isc-redirects/{isc_redirect_rule}/preview'
-  defaults:
-    _form: '\Drupal\isc_redirect_manager\Form\RedirectRulePreviewForm'
-    _title: 'Попередній перегляд правила'
-  requirements:
-    _permission: 'manage isc redirect rules'
-
 isc_redirect_manager.rule_enable:
   path: '/admin/config/search/isc-redirects/{isc_redirect_rule}/enable'
   defaults:

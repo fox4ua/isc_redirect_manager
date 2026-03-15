@@ -152,20 +152,6 @@ class RedirectRuleMatcher {
     return FALSE;
   }
 
-  public function previewRule(IscRedirectRule $rule, ContentEntityInterface $entity): array {
-    $entity = $this->getTranslatedEntity($entity);
-    $current_langcode = $this->getCurrentContentLangcode();
-    $matched = $this->ruleMatchesEntity($rule, $entity);
-    $built_destination = $this->buildDestinationFromParts($rule->getDestination(), $rule->getLanguageMode(), $rule->getTargetLangcode(), $current_langcode);
-    $final_destination = $this->normalizeDestination($built_destination, TRUE);
-    return [
-      'matched' => $matched,
-      'built_destination' => $built_destination,
-      'final_destination' => $final_destination ?? '',
-      'fallback_destination' => '',
-    ];
-  }
-
   public function getCompiledDiagnostics(): array {
     return $this->getCompiledRuntimeRules()['diagnostics'] ?? [];
   }
