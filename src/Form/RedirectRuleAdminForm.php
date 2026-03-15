@@ -348,13 +348,7 @@ class RedirectRuleAdminForm extends FormBase {
     $table[$row_key]['field'] = ['#markup' => $field_markup];
     $table[$row_key]['value'] = ['#markup' => $this->buildValueMarkup($rule)];
     $table[$row_key]['destination'] = ['#plain_text' => $rule->getDestination()];
-    $stats_query = ['rule_id' => $rule->id()];
-    foreach (['entity_type', 'bundle', 'enabled', 'q'] as $key) {
-      $value = trim((string) $this->getRequest()->query->get($key, ''));
-      if ($value !== '') {
-        $stats_query[$key] = $value;
-      }
-    }
+    $stats_query = $this->buildStatsFilterQueryFromRuleContext($rule);
     $table[$row_key]['hits'] = [
       '#type' => 'link',
       '#title' => (string) $hits,
@@ -385,6 +379,23 @@ class RedirectRuleAdminForm extends FormBase {
       ];
     }
     $table[$row_key]['operations'] = ['#type' => 'operations', '#links' => $links];
+  }
+
+  /**
+   * Builds stats-page query arguments bound to stats filter field names.
+   */
+  protected function buildStatsFilterQueryFromRuleContext(IscRedirectRule $rule): array {
+    $query = [
+      'rule_id' => $rule->id(),
+      'bundle' => $rule->getBundle(),
+    ];
+
+    $search = trim((string) $this->getRequest()->query->get('q', ''));
+    if ($search !== '') {
+      $query['q'] = $search;
+    }
+
+    return $query;
   }
 
 
