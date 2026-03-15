@@ -278,7 +278,16 @@ class IscRedirectRuleForm extends EntityForm {
       '#default_value' => (int) ($rule->get('weight') ?: 0),
     ];
 
-    return parent::form($form, $form_state);
+    $form = parent::form($form, $form_state);
+
+    $form['actions']['save_add_another'] = [
+      '#type' => 'submit',
+      '#name' => 'save_add_another',
+      '#value' => $this->t('Save and add another'),
+      '#weight' => 10,
+    ];
+
+    return $form;
   }
 
   public function ajaxRefreshDependent(array &$form, FormStateInterface $form_state) {
@@ -417,6 +426,12 @@ class IscRedirectRuleForm extends EntityForm {
         ? $this->t('Redirect rule has been created.')
         : $this->t('Redirect rule has been updated.')
     );
+
+    $trigger = $form_state->getTriggeringElement();
+    if (($trigger['#name'] ?? '') === 'save_add_another') {
+      $form_state->setRedirect('entity.isc_redirect_rule.add_form');
+      return;
+    }
 
     $form_state->setRedirect('entity.isc_redirect_rule.collection');
   }
