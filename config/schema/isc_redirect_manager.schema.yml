@@ -1,72 +1,63 @@
 isc_redirect_manager.isc_redirect_rule.*:
   type: config_entity
-  label: 'ISC redirect rule'
+  label: 'Правило переадресації'
   mapping:
     id:
       type: string
       label: 'ID'
     label:
       type: label
-      label: 'Label'
+      label: 'Назва'
     enabled:
       type: boolean
-      label: 'Enabled'
+      label: 'Увімкнено'
     entity_type:
       type: string
-      label: 'Entity type'
+      label: 'Тип сутності'
     bundle:
       type: string
-      label: 'Bundle'
+      label: 'Набір'
     match_mode:
       type: string
-      label: 'Match mode'
+      label: 'Режим співставлення'
     target_entity_id:
       type: string
-      label: 'Target entity ID'
+      label: 'ID цільової сутності'
     field_name:
       type: string
-      label: 'Field machine name'
+      label: 'Машинна назва поля'
     condition_type:
       type: string
-      label: 'Condition type'
+      label: 'Тип умови'
     vocabulary:
       type: string
-      label: 'Vocabulary'
+      label: 'Словник'
     match_value:
       type: string
-      label: 'Match value'
+      label: 'Значення умови'
     match_label:
       type: string
-      label: 'Match label'
+      label: 'Підпис значення'
     destination:
       type: string
-      label: 'Destination'
+      label: 'Шлях призначення'
     language_mode:
       type: string
-      label: 'Language mode'
+      label: 'Режим мови'
     target_langcode:
       type: string
-      label: 'Target language code'
+      label: 'Код цільової мови'
     status_code:
       type: integer
-      label: 'HTTP status code'
+      label: 'HTTP-код статусу'
     weight:
       type: integer
-      label: 'Weight'
+      label: 'Вага'
 
 isc_redirect_manager.settings:
   type: config_object
-  label: 'ISC redirect manager settings'
+  label: 'Налаштування правил переадресації'
   mapping:
-    debug_logging:
+    enabled:
       type: boolean
-      label: 'Enable debug logging'
-    failure_log_throttle_window:
-      type: integer
-      label: 'Failure log throttle window'
-    max_failure_log_entries:
-      type: integer
-      label: 'Maximum failure log entries'
-    max_stat_entries:
-      type: integer
-      label: 'Maximum statistics entries'
+      label: 'Увімкнути обробку правил переадресації'

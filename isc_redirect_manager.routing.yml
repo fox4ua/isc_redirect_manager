@@ -1,39 +1,71 @@
-entity.isc_redirect_rule.collection:
+isc_redirect_manager.overview:
   path: '/admin/config/search/isc-redirects'
   defaults:
-    _controller: '\Drupal\isc_redirect_manager\Controller\RedirectModuleController::redirectToDefaultTab'
+    _controller: '\Drupal\isc_redirect_manager\Controller\RedirectRuleController::overviewRootPage'
+    _title: 'Правила переадресації'
   requirements:
     _permission: 'view isc redirect rules'
+  options:
+    _admin_route: TRUE
 
-isc_redirect_manager.node_rules:
-  path: '/admin/config/search/isc-redirects/nodes'
+entity.isc_redirect_rule.collection:
+  path: '/admin/config/search/isc-redirects/materials'
   defaults:
-    _form: '\Drupal\isc_redirect_manager\Form\RedirectRuleAdminForm'
-    _title: 'Правила для матеріалів'
+    _controller: '\Drupal\isc_redirect_manager\Controller\RedirectRuleController::overviewPage'
+    _title: 'Матеріали'
   requirements:
     _permission: 'view isc redirect rules'
+  options:
+    _admin_route: TRUE
 
-isc_redirect_manager.taxonomy_rules:
-  path: '/admin/config/search/isc-redirects/taxonomy'
+isc_redirect_manager.vocabularies:
+  path: '/admin/config/search/isc-redirects/vocabularies'
   defaults:
-    _form: '\Drupal\isc_redirect_manager\Form\RedirectRuleAdminForm'
-    _title: 'Правила для таксономії'
+    _controller: '\Drupal\isc_redirect_manager\Controller\RedirectRuleController::vocabulariesPage'
+    _title: 'Словники'
   requirements:
     _permission: 'view isc redirect rules'
+  options:
+    _admin_route: TRUE
+
+isc_redirect_manager.bundle_rules:
+  path: '/admin/config/search/isc-redirects/{entity_type}/{bundle}'
+  defaults:
+    _controller: '\Drupal\isc_redirect_manager\Controller\RedirectRuleController::bundlePage'
+    _title_callback: '\Drupal\isc_redirect_manager\Controller\RedirectRuleController::bundlePageTitle'
+  requirements:
+    _permission: 'view isc redirect rules'
+    entity_type: 'node|taxonomy_term'
+  options:
+    _admin_route: TRUE
 
 isc_redirect_manager.rule_enable:
   path: '/admin/config/search/isc-redirects/{isc_redirect_rule}/enable'
   defaults:
-    _form: '\Drupal\isc_redirect_manager\Form\RedirectRuleToggleConfirmForm'
+    _form: '\Drupal\isc_redirect_manager\Form\Confirm\RedirectRuleToggleConfirmForm'
   requirements:
     _permission: 'manage isc redirect rules'
+  options:
+    _admin_route: TRUE
 
 isc_redirect_manager.rule_disable:
   path: '/admin/config/search/isc-redirects/{isc_redirect_rule}/disable'
   defaults:
-    _form: '\Drupal\isc_redirect_manager\Form\RedirectRuleToggleConfirmForm'
+    _form: '\Drupal\isc_redirect_manager\Form\Confirm\RedirectRuleToggleConfirmForm'
   requirements:
     _permission: 'manage isc redirect rules'
+  options:
+    _admin_route: TRUE
+
+isc_redirect_manager.bundle_rule_add_redirect:
+  path: '/admin/config/search/isc-redirects/{entity_type}/{bundle}/add'
+  defaults:
+    _controller: '\Drupal\isc_redirect_manager\Controller\RedirectRuleController::addRuleRedirect'
+  requirements:
+    _permission: 'manage isc redirect rules'
+    entity_type: 'node|taxonomy_term'
+  options:
+    _admin_route: TRUE
 
 entity.isc_redirect_rule.add_form:
   path: '/admin/config/search/isc-redirects/add'
@@ -42,6 +74,8 @@ entity.isc_redirect_rule.add_form:
     _title: 'Додати правило переадресації'
   requirements:
     _permission: 'manage isc redirect rules'
+  options:
+    _admin_route: TRUE
 
 entity.isc_redirect_rule.edit_form:
   path: '/admin/config/search/isc-redirects/{isc_redirect_rule}'
@@ -50,6 +84,8 @@ entity.isc_redirect_rule.edit_form:
     _title: 'Редагувати правило переадресації'
   requirements:
     _permission: 'manage isc redirect rules'
+  options:
+    _admin_route: TRUE
 
 entity.isc_redirect_rule.delete_form:
   path: '/admin/config/search/isc-redirects/{isc_redirect_rule}/delete'
@@ -58,22 +94,8 @@ entity.isc_redirect_rule.delete_form:
     _title: 'Видалити правило переадресації'
   requirements:
     _permission: 'delete isc redirect rules'
-
-isc_redirect_manager.logs:
-  path: '/admin/config/search/isc-redirects/logs'
-  defaults:
-    _controller: '\Drupal\isc_redirect_manager\Controller\RedirectLogController::page'
-    _title: 'Журнал помилок переадресації'
-  requirements:
-    _permission: 'view isc redirect logs'
-
-isc_redirect_manager.stats:
-  path: '/admin/config/search/isc-redirects/stats'
-  defaults:
-    _controller: '\Drupal\isc_redirect_manager\Controller\RedirectStatsController::page'
-    _title: 'Статистика правил переадресації'
-  requirements:
-    _permission: 'view isc redirect stats'
+  options:
+    _admin_route: TRUE
 
 isc_redirect_manager.destination_autocomplete:
   path: '/admin/isc-redirect/autocomplete'
@@ -81,6 +103,8 @@ isc_redirect_manager.destination_autocomplete:
     _controller: '\Drupal\isc_redirect_manager\Controller\DestinationAutocompleteController::autocomplete'
   requirements:
     _permission: 'manage isc redirect rules'
+  options:
+    _admin_route: TRUE
 
 isc_redirect_manager.settings:
   path: '/admin/config/search/isc-redirects/settings'
@@ -89,12 +113,5 @@ isc_redirect_manager.settings:
     _title: 'Налаштування переадресації'
   requirements:
     _permission: 'administer isc redirect settings'
-
-
-isc_redirect_manager.stats_clear:
-  path: '/admin/config/search/isc-redirects/stats/clear'
-  defaults:
-    _form: '\Drupal\isc_redirect_manager\Form\ClearRedirectStatsForm'
-    _title: 'Очистити статистику'
-  requirements:
-    _permission: 'administer isc redirect rules'
+  options:
+    _admin_route: TRUE

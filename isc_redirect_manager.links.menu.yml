@@ -1,5 +1,5 @@
 isc_redirect_manager.admin:
-  title: 'ISC redirect rules'
-  description: 'Manage redirect rules, logs, statistics and settings.'
-  route_name: entity.isc_redirect_rule.collection
+  title: 'Правила переадресації'
+  description: 'Керування правилами переадресації для матеріалів і словників.'
+  route_name: isc_redirect_manager.overview
   parent: system.admin_config_search

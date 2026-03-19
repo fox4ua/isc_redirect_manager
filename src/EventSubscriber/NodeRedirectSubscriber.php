@@ -10,21 +10,27 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
- * Subscribes to canonical entity requests and applies redirect rules.
+ * Applies redirect rules on entity canonical pages.
  */
-class NodeRedirectSubscriber implements EventSubscriberInterface {
+final class NodeRedirectSubscriber implements EventSubscriberInterface {
 
   public function __construct(
     protected RedirectRuleMatcher $matcher,
     protected AdminContext $adminContext,
   ) {}
 
+  /**
+   * {@inheritdoc}
+   */
   public static function getSubscribedEvents(): array {
     return [
       KernelEvents::REQUEST => ['onRequest', 30],
     ];
   }
 
+  /**
+   * Applies redirect response for supported entity routes.
+   */
   public function onRequest(RequestEvent $event): void {
     if (!$event->isMainRequest()) {
       return;
@@ -35,8 +41,8 @@ class NodeRedirectSubscriber implements EventSubscriberInterface {
       return;
     }
 
-    $route = (string) $request->attributes->get('_route');
-    if (!in_array($route, ['entity.node.canonical', 'entity.taxonomy_term.canonical'], TRUE)) {
+    $route_name = (string) $request->attributes->get('_route');
+    if (!in_array($route_name, ['entity.node.canonical', 'entity.taxonomy_term.canonical'], TRUE)) {
       return;
     }
 
@@ -45,15 +51,16 @@ class NodeRedirectSubscriber implements EventSubscriberInterface {
       return;
     }
 
-    $entity = $route === 'entity.taxonomy_term.canonical'
+    $entity = $route_name === 'entity.taxonomy_term.canonical'
       ? $request->attributes->get('taxonomy_term')
       : $request->attributes->get('node');
+
     if (!$entity instanceof ContentEntityInterface) {
       return;
     }
 
     $response = $this->matcher->match($entity);
-    if ($response) {
+    if ($response !== NULL) {
       $event->setResponse($response);
     }
   }

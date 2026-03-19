@@ -1,8 +1,4 @@
 services:
-  logger.channel.isc_redirect_manager:
-    parent: logger.channel_base
-    arguments: ['isc_redirect_manager']
-
   isc_redirect_manager.alias_lookup:
     class: Drupal\isc_redirect_manager\Service\AliasLookupService
     arguments:
@@ -11,28 +7,19 @@ services:
       - '@entity_type.manager'
       - '@path_alias.manager'
 
-  isc_redirect_manager.failure_logger:
-    class: Drupal\isc_redirect_manager\Service\RedirectFailureLogger
-    arguments:
-      - '@database'
-      - '@config.factory'
-      - '@logger.channel.isc_redirect_manager'
-      - '@datetime.time'
-
   isc_redirect_manager.matcher:
     class: Drupal\isc_redirect_manager\Service\RedirectRuleMatcher
     arguments:
       - '@entity_type.manager'
       - '@path.validator'
       - '@request_stack'
-      - '@logger.channel.isc_redirect_manager'
       - '@cache.redirect_rules'
       - '@language_manager'
-      - '@isc_redirect_manager.failure_logger'
       - '@path_alias.manager'
       - '@entity_field.manager'
       - '@entity_type.bundle.info'
       - '@lock'
+      - '@config.factory'
 
   isc_redirect_manager.rule_diagnostics:
     class: Drupal\isc_redirect_manager\Service\RedirectRuleDiagnosticsService
@@ -51,3 +38,10 @@ services:
     class: Drupal\Core\Cache\CacheBackendInterface
     factory: ['@cache_factory', 'get']
     arguments: ['redirect_rules']
+
+  isc_redirect_manager.rule_table_builder:
+    class: Drupal\isc_redirect_manager\Builder\RedirectRuleTableBuilder
+    arguments:
+      - '@entity_type.manager'
+      - '@entity_field.manager'
+      - '@isc_redirect_manager.rule_diagnostics'

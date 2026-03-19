@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\isc_redirect_manager\Form;
+namespace Drupal\isc_redirect_manager\Form\Confirm;
 
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -10,7 +10,7 @@ use Drupal\isc_redirect_manager\Service\RedirectRuleMatcher;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Confirm form for enabling or disabling a rule.
+ * Форма підтвердження увімкнення або вимкнення правила.
  */
 class RedirectRuleToggleConfirmForm extends ConfirmFormBase {
 
@@ -36,40 +36,32 @@ class RedirectRuleToggleConfirmForm extends ConfirmFormBase {
 
   public function getQuestion(): string {
     return $this->rule && $this->rule->isEnabled()
-      ? (string) $this->t('Disable redirect rule "@label"?', ['@label' => $this->rule->label()])
-      : (string) $this->t('Enable redirect rule "@label"?', ['@label' => $this->rule?->label() ?? '']);
+      ? (string) $this->t('Вимкнути правило переадресації "@label"?', ['@label' => $this->rule->label()])
+      : (string) $this->t('Увімкнути правило переадресації "@label"?', ['@label' => $this->rule?->label() ?? '']);
   }
 
   public function getDescription(): string {
     if ($this->rule && !$this->rule->isEnabled()) {
-      return (string) $this->t('The rule will be enabled only if it does not conflict with another active rule.');
+      return (string) $this->t('Правило буде увімкнено лише якщо воно не конфліктує з іншим активним правилом.');
     }
-    return (string) $this->t('The rule state will be changed immediately after confirmation.');
+    return (string) $this->t('Стан правила буде змінено одразу після підтвердження.');
   }
 
   public function getConfirmText(): string {
     return $this->rule && $this->rule->isEnabled()
-      ? (string) $this->t('Disable')
-      : (string) $this->t('Enable');
+      ? (string) $this->t('Вимкнути')
+      : (string) $this->t('Увімкнути');
   }
 
   public function getCancelUrl(): Url {
-    $query = [];
-    $request = $this->getRequest();
-    foreach (['entity_type', 'bundle', 'enabled', 'q'] as $key) {
-      $value = trim((string) $request->query->get($key, ''));
-      if ($value !== '') {
-        $query[$key] = $value;
-      }
+    if ($this->rule instanceof IscRedirectRule) {
+      return Url::fromRoute('isc_redirect_manager.bundle_rules', [
+        'entity_type' => $this->rule->getTargetEntityType(),
+        'bundle' => $this->rule->getBundle(),
+      ]);
     }
 
-    $route_name = (string) $request->query->get('destination_route', 'entity.isc_redirect_rule.collection');
-    $allowed = ['entity.isc_redirect_rule.collection', 'isc_redirect_manager.node_rules', 'isc_redirect_manager.taxonomy_rules'];
-    if (!in_array($route_name, $allowed, TRUE)) {
-      $route_name = 'entity.isc_redirect_rule.collection';
-    }
-
-    return Url::fromRoute($route_name, [], ['query' => $query]);
+    return Url::fromRoute('entity.isc_redirect_rule.collection');
   }
 
   public function submitForm(array &$form, FormStateInterface $form_state): void {
@@ -81,17 +73,17 @@ class RedirectRuleToggleConfirmForm extends ConfirmFormBase {
     if ($this->rule->isEnabled()) {
       $this->rule->set('enabled', FALSE);
       $this->rule->save();
-      $this->messenger()->addStatus($this->t('Rule disabled.'));
+      $this->messenger()->addStatus($this->t('Правило вимкнено.'));
     }
     else {
       if ($this->matcher->hasEnabledConflict($this->rule)) {
-        $this->messenger()->addError($this->t('This rule conflicts with another active rule and cannot be enabled.'));
+        $this->messenger()->addError($this->t('Це правило конфліктує з іншим активним правилом і не може бути увімкнене.'));
         $form_state->setRedirectUrl($this->getCancelUrl());
         return;
       }
       $this->rule->set('enabled', TRUE);
       $this->rule->save();
-      $this->messenger()->addStatus($this->t('Rule enabled.'));
+      $this->messenger()->addStatus($this->t('Правило увімкнено.'));
     }
 
     $form_state->setRedirectUrl($this->getCancelUrl());

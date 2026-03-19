@@ -5,11 +5,215 @@
  * Runtime hooks for ISC Redirect Manager.
  */
 
+use Drupal\Core\Breadcrumb\Breadcrumb;
+use Drupal\Core\Link;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Url;
+use Drupal\isc_redirect_manager\Entity\IscRedirectRule;
+
 /**
- * Implements hook_cron().
+ * Implements hook_system_breadcrumb_alter().
  */
-function isc_redirect_manager_cron(): void {
-  $logger = \Drupal::service('isc_redirect_manager.failure_logger');
-  $logger->cleanupLogs();
-  $logger->cleanupStats();
+function isc_redirect_manager_system_breadcrumb_alter(Breadcrumb &$breadcrumb, RouteMatchInterface $route_match, array $context): void {
+  $route_name = $route_match->getRouteName();
+
+  $supported_routes = [
+    'isc_redirect_manager.overview',
+    'entity.isc_redirect_rule.collection',
+    'isc_redirect_manager.vocabularies',
+    'isc_redirect_manager.settings',
+    'isc_redirect_manager.bundle_rules',
+    'isc_redirect_manager.bundle_rule_add_redirect',
+    'entity.isc_redirect_rule.add_form',
+    'entity.isc_redirect_rule.edit_form',
+    'entity.isc_redirect_rule.delete_form',
+    'isc_redirect_manager.rule_enable',
+    'isc_redirect_manager.rule_disable',
+  ];
+
+  if (!in_array($route_name, $supported_routes, TRUE)) {
+    return;
+  }
+
+  $append_link = static function (Breadcrumb $breadcrumb, Link $link): void {
+    $target_url = $link->getUrl()->toString();
+    $target_text = (string) $link->getText();
+
+    foreach ($breadcrumb->getLinks() as $existing_link) {
+      if (
+        $existing_link->getUrl()->toString() === $target_url
+        && (string) $existing_link->getText() === $target_text
+      ) {
+        return;
+      }
+    }
+
+    $breadcrumb->addLink($link);
+  };
+
+  $append_link(
+    $breadcrumb,
+    Link::fromTextAndUrl(
+      t('Правила переадресації'),
+      Url::fromRoute('isc_redirect_manager.overview')
+    )
+  );
+
+  if ($route_name === 'isc_redirect_manager.overview') {
+    $breadcrumb->addCacheContexts(['route']);
+    $breadcrumb->addCacheTags(['config:system.menu.admin']);
+    return;
+  }
+
+  if ($route_name === 'entity.isc_redirect_rule.collection') {
+    $append_link(
+      $breadcrumb,
+      Link::fromTextAndUrl(
+        t('Матеріали'),
+        Url::fromRoute('entity.isc_redirect_rule.collection')
+      )
+    );
+
+    $breadcrumb->addCacheContexts(['route']);
+    $breadcrumb->addCacheTags(['config:system.menu.admin']);
+    return;
+  }
+
+  if ($route_name === 'isc_redirect_manager.vocabularies') {
+    $append_link(
+      $breadcrumb,
+      Link::fromTextAndUrl(
+        t('Словники'),
+        Url::fromRoute('isc_redirect_manager.vocabularies')
+      )
+    );
+
+    $breadcrumb->addCacheContexts(['route']);
+    $breadcrumb->addCacheTags(['config:system.menu.admin']);
+    return;
+  }
+
+  if ($route_name === 'isc_redirect_manager.settings') {
+    $append_link(
+      $breadcrumb,
+      Link::fromTextAndUrl(
+        t('Налаштування'),
+        Url::fromRoute('isc_redirect_manager.settings')
+      )
+    );
+
+    $breadcrumb->addCacheContexts(['route']);
+    $breadcrumb->addCacheTags(['config:system.menu.admin']);
+    return;
+  }
+
+  $section = isc_redirect_manager_resolve_breadcrumb_section($route_match);
+
+  $section_is_vocabularies = $section['entity_type'] === 'taxonomy_term';
+  $section_label = $section_is_vocabularies ? t('Словники') : t('Матеріали');
+  $section_route = $section_is_vocabularies
+    ? 'isc_redirect_manager.vocabularies'
+    : 'entity.isc_redirect_rule.collection';
+
+  $append_link(
+    $breadcrumb,
+    Link::fromTextAndUrl($section_label, Url::fromRoute($section_route))
+  );
+
+  if (in_array($route_name, ['entity.isc_redirect_rule.add_form', 'isc_redirect_manager.bundle_rule_add_redirect'], TRUE)) {
+    $query = [];
+
+    if ($section['entity_type'] !== '') {
+      $query['entity_type'] = $section['entity_type'];
+    }
+
+    if ($section['bundle'] !== '') {
+      $query['bundle'] = $section['bundle'];
+    }
+
+    $append_link(
+      $breadcrumb,
+      Link::fromTextAndUrl(
+        t('Додати правило'),
+        Url::fromRoute('entity.isc_redirect_rule.add_form', [], ['query' => $query])
+      )
+    );
+  }
+  elseif ($section['rule'] instanceof IscRedirectRule && $section['rule_label'] !== '') {
+    $append_link(
+      $breadcrumb,
+      Link::fromTextAndUrl(
+        $section['rule_label'],
+        Url::fromRoute('entity.isc_redirect_rule.edit_form', [
+          'isc_redirect_rule' => $section['rule']->id(),
+        ])
+      )
+    );
+  }
+
+  $breadcrumb->addCacheContexts([
+    'route',
+    'url.query_args:entity_type',
+    'url.query_args:bundle',
+  ]);
+  $breadcrumb->addCacheTags(['config:system.menu.admin']);
+}
+
+/**
+ * Resolves breadcrumb context for redirect administration routes.
+ *
+ * @return array{entity_type:string,bundle:string,rule:?\Drupal\isc_redirect_manager\Entity\IscRedirectRule,rule_label:string}
+ *   Breadcrumb context.
+ */
+function isc_redirect_manager_resolve_breadcrumb_section(RouteMatchInterface $route_match): array {
+  $entity_type = '';
+  $bundle = '';
+  $rule = NULL;
+  $rule_label = '';
+
+  $rule_parameter = $route_match->getParameter('isc_redirect_rule');
+
+  if ($rule_parameter instanceof IscRedirectRule) {
+    $rule = $rule_parameter;
+  }
+  elseif (is_string($rule_parameter) && $rule_parameter !== '') {
+    $loaded_rule = \Drupal::entityTypeManager()
+      ->getStorage('isc_redirect_rule')
+      ->load($rule_parameter);
+
+    if ($loaded_rule instanceof IscRedirectRule) {
+      $rule = $loaded_rule;
+    }
+  }
+
+  if ($rule instanceof IscRedirectRule) {
+    $entity_type = (string) $rule->getTargetEntityType();
+    $bundle = (string) $rule->getBundle();
+    $rule_label = (string) $rule->label();
+  }
+  else {
+    $entity_type = (string) ($route_match->getParameter('entity_type') ?? '');
+    $bundle = (string) ($route_match->getParameter('bundle') ?? '');
+
+    $request = \Drupal::request();
+
+    if ($entity_type === '' && $request) {
+      $entity_type = trim((string) $request->query->get('entity_type', ''));
+    }
+
+    if ($bundle === '' && $request) {
+      $bundle = trim((string) $request->query->get('bundle', ''));
+    }
+  }
+
+  if ($entity_type !== 'taxonomy_term') {
+    $entity_type = 'node';
+  }
+
+  return [
+    'entity_type' => $entity_type,
+    'bundle' => $bundle,
+    'rule' => $rule,
+    'rule_label' => $rule_label,
+  ];
 }

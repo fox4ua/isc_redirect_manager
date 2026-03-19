@@ -35,8 +35,11 @@ class IscRedirectRuleForm extends EntityForm {
     $rule = $this->entity;
 
     $resolved = $this->resolveStoredRuleContext($rule);
-    $entity_type = (string) ($form_state->getValue('entity_type') ?? $resolved['entity_type']);
-    $bundle = (string) ($form_state->getValue('bundle') ?? $resolved['bundle']);
+    $request = $this->getRequest();
+    $default_entity_type = $rule->isNew() ? (string) $request->query->get('entity_type', $resolved['entity_type']) : $resolved['entity_type'];
+    $default_bundle = $rule->isNew() ? (string) $request->query->get('bundle', $resolved['bundle']) : $resolved['bundle'];
+    $entity_type = (string) ($form_state->getValue('entity_type') ?? $default_entity_type);
+    $bundle = (string) ($form_state->getValue('bundle') ?? $default_bundle);
     $match_mode = (string) ($form_state->getValue('match_mode') ?? $resolved['match_mode']);
     $field_name = (string) ($form_state->getValue('field_name') ?? $resolved['field_name']);
     $match_value = (string) ($form_state->getValue('match_value') ?? $resolved['match_value']);
@@ -171,7 +174,7 @@ class IscRedirectRuleForm extends EntityForm {
 
     $form['destination'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Redirect destination'),
+      '#title' => $this->t('Шлях призначення'),
       '#default_value' => (string) ($form_state->getValue('destination') ?? $rule->getDestination()),
       '#autocomplete_route_name' => 'isc_redirect_manager.destination_autocomplete',
       '#required' => TRUE,
@@ -179,11 +182,11 @@ class IscRedirectRuleForm extends EntityForm {
     ];
     $form['language_mode'] = [
       '#type' => 'select',
-      '#title' => $this->t('Language mode'),
+      '#title' => $this->t('Режим мови'),
       '#options' => [
-        'content' => $this->t('Use the language of the current entity translation'),
-        'fixed' => $this->t('Always redirect to a specific language'),
-        'neutral' => $this->t('Do not add a language prefix'),
+        'content' => $this->t('Використовувати мову поточного перекладу сутності'),
+        'fixed' => $this->t('Завжди переадресовувати на певну мову'),
+        'neutral' => $this->t('Не додавати мовний префікс'),
       ],
       '#default_value' => $language_mode,
       '#required' => TRUE,
@@ -192,7 +195,7 @@ class IscRedirectRuleForm extends EntityForm {
     $form['language'] = ['#type' => 'container', '#attributes' => ['id' => 'isc-redirect-language']];
     $form['language']['target_langcode'] = [
       '#type' => 'select',
-      '#title' => $this->t('Target language'),
+      '#title' => $this->t('Цільова мова'),
       '#options' => $this->getLanguageOptions(),
       '#empty_option' => $this->t('- Select language -'),
       '#default_value' => $target_langcode,
@@ -201,7 +204,7 @@ class IscRedirectRuleForm extends EntityForm {
     $form['status_code'] = [
       '#type' => 'select',
       '#title' => $this->t('Тип редиректу'),
-      '#options' => [302 => '302 Temporary redirect', 301 => '301 Permanent redirect'],
+      '#options' => [302 => '302 Тимчасова переадресація', 301 => '301 Постійна переадресація'],
       '#default_value' => $rule->getStatusCode(),
     ];
     $form['weight'] = ['#type' => 'weight', '#title' => $this->t('Вага'), '#default_value' => $rule->getWeight()];
@@ -340,7 +343,10 @@ class IscRedirectRuleForm extends EntityForm {
 
     $status = $rule->save();
     $this->messenger()->addStatus($status === SAVED_NEW ? $this->t('Правило редиректу створено.') : $this->t('Правило редиректу оновлено.'));
-    $form_state->setRedirect('entity.isc_redirect_rule.collection');
+    $form_state->setRedirect('isc_redirect_manager.bundle_rules', [
+      'entity_type' => $rule->getTargetEntityType(),
+      'bundle' => $rule->getBundle(),
+    ]);
   }
 
 

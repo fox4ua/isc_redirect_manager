@@ -12,8 +12,8 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Lock\LockBackendInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
-use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\Core\Path\PathValidatorInterface;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\isc_redirect_manager\Entity\IscRedirectRule;
 use Drupal\path_alias\AliasManagerInterface;
 use Drupal\taxonomy\TermInterface;
@@ -44,17 +44,20 @@ class RedirectRuleMatcher {
     protected EntityTypeManagerInterface $entityTypeManager,
     protected PathValidatorInterface $pathValidator,
     protected RequestStack $requestStack,
-    protected LoggerChannelInterface $logger,
     protected CacheBackendInterface $cacheBackend,
     protected LanguageManagerInterface $languageManager,
-    protected RedirectFailureLogger $failureLogger,
     protected AliasManagerInterface $aliasManager,
     protected EntityFieldManagerInterface $entityFieldManager,
     protected EntityTypeBundleInfoInterface $bundleInfo,
     protected LockBackendInterface $lock,
+    protected ConfigFactoryInterface $configFactory,
   ) {}
 
   public function match(ContentEntityInterface $entity): ?RedirectResponse {
+    if (!(bool) $this->configFactory->get('isc_redirect_manager.settings')->get('enabled')) {
+      return NULL;
+    }
+
     $entity = $this->getTranslatedEntity($entity);
     $entity_type = $entity->getEntityTypeId();
     $bundle = $entity->bundle();
@@ -80,34 +83,12 @@ class RedirectRuleMatcher {
 
       $validated_destination = $this->normalizeDestination($destination, TRUE);
       if ($validated_destination === NULL) {
-        $this->failureLogger->logFailure([
-          'event_type' => 'invalid_destination',
-          'rule_id' => (string) $rule['id'],
-          'rule_label' => (string) $rule['label'],
-          'nid' => (int) $entity->id(),
-          'langcode' => $current_langcode,
-          'base_destination' => (string) $rule['destination'],
-          'built_destination' => $destination,
-          'reason' => 'Destination is invalid, inaccessible or does not resolve in the selected language.',
-        ]);
         continue;
       }
-
       if ($this->isRedirectLoop($entity, $validated_destination)) {
-        $this->failureLogger->logFailure([
-          'event_type' => 'redirect_loop',
-          'rule_id' => (string) $rule['id'],
-          'rule_label' => (string) $rule['label'],
-          'nid' => (int) $entity->id(),
-          'langcode' => $current_langcode,
-          'base_destination' => (string) $rule['destination'],
-          'built_destination' => $validated_destination,
-          'reason' => 'Redirect loop detected: destination resolves to the current entity page.',
-        ]);
         continue;
       }
 
-      $this->failureLogger->incrementRuleHit((string) $rule['id'], (int) $entity->id(), $validated_destination);
       return new RedirectResponse($validated_destination, (int) $rule['status_code']);
     }
 
@@ -150,6 +131,20 @@ class RedirectRuleMatcher {
       }
     }
     return FALSE;
+  }
+
+  public function previewRule(IscRedirectRule $rule, ContentEntityInterface $entity): array {
+    $entity = $this->getTranslatedEntity($entity);
+    $current_langcode = $this->getCurrentContentLangcode();
+    $matched = $this->ruleMatchesEntity($rule, $entity);
+    $built_destination = $this->buildDestinationFromParts($rule->getDestination(), $rule->getLanguageMode(), $rule->getTargetLangcode(), $current_langcode);
+    $final_destination = $this->normalizeDestination($built_destination, TRUE);
+    return [
+      'matched' => $matched,
+      'built_destination' => $built_destination,
+      'final_destination' => $final_destination ?? '',
+      'fallback_destination' => '',
+    ];
   }
 
   public function getCompiledDiagnostics(): array {
@@ -296,6 +291,25 @@ class RedirectRuleMatcher {
     }
 
     return $issues;
+  }
+
+  protected function ruleMatchesEntity(IscRedirectRule $rule, ContentEntityInterface $entity): bool {
+    if ($rule->getMatchMode() === 'entity_bundle') {
+      return TRUE;
+    }
+    if ($rule->getMatchMode() === 'entity_id') {
+      return (string) $entity->id() === $rule->getTargetEntityId();
+    }
+    $field_name = $rule->getFieldName();
+    $condition_type = $rule->getConditionType();
+    $match_value = $rule->getMatchValue();
+    if ($field_name === '' || $condition_type === '' || $match_value === '') {
+      return FALSE;
+    }
+    if (!$entity->hasField($field_name) || $entity->get($field_name)->isEmpty()) {
+      return FALSE;
+    }
+    return $this->fieldMatches($entity, $field_name, $condition_type, $rule->getVocabulary(), $match_value);
   }
 
   protected function runtimeRuleMatchesEntity(array $rule, ContentEntityInterface $entity): bool {

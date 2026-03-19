@@ -1,6 +1,6 @@
 name: ISC Redirect Manager
 type: module
-description: 'Universal redirect rules for nodes based on taxonomy, list, and boolean field values.'
+description: 'Керування правилами переадресації для матеріалів і словників.'
 package: ISC
 core_version_requirement: ^10 || ^11
 dependencies:

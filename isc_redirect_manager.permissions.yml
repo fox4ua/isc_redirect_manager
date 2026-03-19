@@ -1,28 +1,20 @@
 view isc redirect rules:
-  title: "Перегляд правил ISC Redirect"
-  description: "Перегляд сторінок адміністрування правил редиректу."
+  title: 'Перегляд правил переадресації'
+  description: 'Доступ до адміністративних сторінок правил переадресації.'
 
 manage isc redirect rules:
-  title: "Створення та редагування правил ISC Redirect"
-  description: "Створення, редагування, зміна порядку, увімкнення та вимкнення правил редиректу."
+  title: 'Керування правилами переадресації'
+  description: 'Створення, редагування, впорядкування, попередній перегляд, увімкнення та вимкнення правил переадресації.'
 
 delete isc redirect rules:
-  title: "Видалення правил ISC Redirect"
-  description: "Видалення правил редиректу."
-
-view isc redirect logs:
-  title: "Перегляд журналу ISC Redirect"
-  description: "Перегляд журналу fallback-помилок редиректу."
-
-view isc redirect stats:
-  title: "Перегляд статистики ISC Redirect"
-  description: "Перегляд статистики використання правил редиректу."
+  title: 'Видалення правил переадресації'
+  description: 'Видалення правил переадресації.'
 
 administer isc redirect settings:
-  title: "Керування налаштуваннями ISC Redirect"
-  description: "Зміна налаштувань розширеного журналювання та зберігання даних."
+  title: 'Керування налаштуваннями переадресації'
+  description: 'Зміна налаштувань модуля правил переадресації.'
 
 administer isc redirect rules:
-  title: "Повне адміністрування правил ISC Redirect"
-  description: "Повний доступ до всіх операцій і налаштувань правил ISC Redirect."
+  title: 'Повне адміністрування правил переадресації'
+  description: 'Повний доступ до всіх операцій і налаштувань правил переадресації.'
   restrict access: true

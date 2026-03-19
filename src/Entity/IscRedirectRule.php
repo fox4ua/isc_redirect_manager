@@ -6,18 +6,17 @@ use Drupal\Core\Cache\Cache;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 
 /**
- * Defines redirect rule config entity.
+ * Описує конфігураційну сутність правила переадресації.
  *
  * @ConfigEntityType(
  *   id = "isc_redirect_rule",
- *   label = @Translation("ISC redirect rule"),
- *   label_collection = @Translation("ISC redirect rules"),
+ *   label = @Translation("Правило переадресації"),
+ *   label_collection = @Translation("Правила переадресації"),
  *   handlers = {
- *     "list_builder" = "Drupal\isc_redirect_manager\IscRedirectRuleListBuilder",
  *     "form" = {
  *       "add" = "Drupal\isc_redirect_manager\Form\IscRedirectRuleForm",
  *       "edit" = "Drupal\isc_redirect_manager\Form\IscRedirectRuleForm",
- *       "delete" = "Drupal\Core\Entity\EntityDeleteForm"
+ *       "delete" = "Drupal\isc_redirect_manager\Form\Confirm\RedirectRuleDeleteForm"
  *     }
  *   },
  *   admin_permission = "administer isc redirect rules",
@@ -29,7 +28,7 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  *     "status" = "enabled"
  *   },
  *   links = {
- *     "collection" = "/admin/config/search/isc-redirects",
+ *     "collection" = "/admin/config/search/isc-redirects/materials",
  *     "add-form" = "/admin/config/search/isc-redirects/add",
  *     "edit-form" = "/admin/config/search/isc-redirects/{isc_redirect_rule}",
  *     "delete-form" = "/admin/config/search/isc-redirects/{isc_redirect_rule}/delete"
